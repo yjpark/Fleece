@@ -90,13 +90,26 @@ type Item with
 
 type NestedItem = NestedItem of Item
 
+let inline private getJObject (json : IReadOnlyDictionary<string, JsonValue>) (key : string) : Choice<IReadOnlyDictionary<string, JsonValue>, string> =
+    match json.TryGetValue key with
+    | true, v ->
+        match v with
+        | JObject o ->
+            Success o
+        | _ ->
+            Failure <| sprintf "Expected Data As JObject, Got: %A" v
+    | _ ->
+        Failure <| sprintf "Get Data Failed: %s" (JObject(json).ToString())
+
+let inline (.@*) o k = getJObject o k
+
 type NestedItem with
     static member OfJson json =
         match json with
         | JObject o ->
             monad {
                 let! id = o .@ "id"
-                let! sub = o .@ "blah" |> map jsonObjectGetValues
+                let! sub = o .@* "blah" //.@ "blah" |> map jsonObjectGetValues
                 let! brand = sub .@ "brand"
                 let! availability = sub .@? "availability"
                 return NestedItem {

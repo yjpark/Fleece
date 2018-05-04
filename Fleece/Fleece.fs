@@ -45,6 +45,8 @@ module Fleece =
     type JValue with
         
         member private x.FoldNumeric (e:decimal -> 'a, f:float -> 'a) : 'a =
+            Console.WriteLine("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA {0} -> {1}", x.Type, x.ToObject)
+            printfn "AAAAAAAAAAAAAAAAAAAAAA %A -> %A" x.Type x.ToObject
             match x.Type with
             | JTokenType.Integer -> e (x.ToObject())
             | JTokenType.Float -> f (x.ToObject())
@@ -94,7 +96,10 @@ module Fleece =
         | t -> failwithf "Invalid JTokenType %A" t
     
     let dictAsProps (x: IReadOnlyDictionary<string, JToken>) = 
-        x |> Seq.map (fun p -> p.Key,p.Value) |> Array.ofSeq 
+        x |> Seq.map (fun p ->
+                Console.WriteLine("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB {0} -> <{1}> {2}", p.Key, p.Value.GetType(), p.Value)
+                p.Key,p.Value
+             ) |> Array.ofSeq 
 
     let inline JArray (x: JToken IReadOnlyList) = JArray (x |> Array.ofSeq) :> JToken
     let inline JObject (x: IReadOnlyDictionary<string, JToken>) = JObject (dictAsProps x) :> JToken
